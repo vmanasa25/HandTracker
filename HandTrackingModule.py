@@ -17,22 +17,36 @@ class handTracker():
     def find(self, img, draw=True):
 
         rgb_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        result = self.hand.process(rgb_img)
+        self.result = self.hand.process(rgb_img)
         # print(result.multi_hand_landmarks)
 
-        if result.multi_hand_landmarks:
-            for handmk in result.multi_hand_landmarks:
+        if self.result.multi_hand_landmarks:
+            for handmk in self.result.multi_hand_landmarks:
                 if draw:
                     self.mpdraw.draw_landmarks(img, handmk, self.mphand.HAND_CONNECTIONS)
         return img
 
-        # for id, l in enumerate(handmk.landmark):
-        # print(i,l)
-        # height, width, channels = img.shape
-        # cx, cy = int(l.x * width), int(l.y * height)
-        # print(id, cx, cy)
-        # if id == 0:
-        #     cv2.circle(img, (cx, cy), 15, (255, 0, 255), cv2.FILLED)
+
+
+    def findPos(self, img, handnum = 0, draw = True):
+
+        lmk = []
+        if self.result.multi_hand_landmarks:
+            myHand = self.result.multi_hand_landmarks[handnum]
+
+
+            for id, l in enumerate(myHand.landmark):
+                # print(i,l)
+                height, width, channels = img.shape
+                cx, cy = int(l.x * width), int(l.y * height)
+                #print(id, cx, cy)
+                lmk.append([id,cx,cy])
+                if draw:
+                # if id == 0:
+                   cv2.circle(img, (cx, cy), 15, (255, 0, 0), cv2.FILLED)
+
+        return lmk
+
 
 
 def main():
@@ -44,6 +58,9 @@ def main():
     while True:
         success, img = cap.read()
         img = detector.find(img)
+        lmk = detector.findPos(img)
+        if len(lmk) != 0:
+            print(lmk[4])
         curr_time = time.time()
         fps = 1 / (curr_time - prev_time)
         prev_time = curr_time
